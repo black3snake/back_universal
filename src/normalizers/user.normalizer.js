@@ -15,6 +15,8 @@ class UserNormalizer extends BaseNormalizer {
             experience: user.experience || 0,
             age: user.age || 0,
             address: user.address || '',
+            phone: user.phone || '',
+            email: user.email || '',
             active: user.active || false,
             createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : null
         };
