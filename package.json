@@ -1,0 +1,26 @@
+{
+  "name": "back_universal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon --inspect=4004 app.js",
+    "seed": "node database/seed-users.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "cors": "^2.8.5",
+    "express": "^5.0.0",
+    "mongoose": "^8.9.5",
+    "multer": "^2.0.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "cyrillic-to-translit-js": "^3.2.1",
+    "migrate-mongo": "^9.0.0",
+    "nodemon": "^2.0.19"
+  }
+}
