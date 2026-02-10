@@ -1,5 +1,8 @@
 const UserModel = require('../models/user.model');
 const UserNormalizer = require('../normalizers/user.normalizer');
+const ValidationUtils = require("../utils/validation.utils");
+const path = require("path");
+const fs = require('fs');
 
 class UserController {
     async getUsers(req, res) {
@@ -10,7 +13,7 @@ class UserController {
 
 
             const users = await UserModel.find()
-                .sort({ createdAt: -1 })
+                .sort({createdAt: -1})
                 .skip(skip)
                 .limit(itemsPerPage);
 
@@ -28,7 +31,7 @@ class UserController {
             });
 
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({error: error.message});
         }
     }
 
@@ -56,6 +59,7 @@ class UserController {
             });
         }
     }
+
     // async getOne(req, res) {
     //     try {
     //         const user = await UserModel.findById(req.params.id);
@@ -69,14 +73,67 @@ class UserController {
     // }
 
     async create(req, res) {
+        console.log('Данные запроса:', req.body);
+        console.log('Файл:', req.file);
+
+        // Проверяем наличие файла
+        if (!req.file) {
+            // Если файла нет, можно использовать заглушку или вернуть ошибку
+            // В зависимости от требований
+            console.log('Файл не загружен, используем заглушку');
+        }
+
+
+        const {error} = ValidationUtils.createOrderValidation(req.body);
+        if (error) {
+            console.log(error.details);
+            return res.status(400).json({error: true, message: error.details[0].message});
+        }
         try {
-            const user = new UserModel(req.body);
+            // Создаем пользователя из данных формы
+            const user = new UserModel({
+                ...req.body,
+                // Если есть файл, добавляем путь к аватару
+                avatar: req.file ? `/uploads/users/${req.file.filename}` : '/images/avatar-stub.png'
+            });
+
+            // const user = new UserModel(req.body);
+            const existingUser = await UserModel.findOne({url: user.generateUrl()});
+            if (existingUser) {
+
+                if (req.file) {
+                    const rootDir = process.cwd();
+                    const filePath = path.join(rootDir, 'public', 'uploads', req.file.filename);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+                return res.status(400).json({error: true, message: 'Такой пользователь уже существует'});
+            }
+
+            // Удаляем старый файл, если есть (для обновления)
+            if (user.avatar && user.avatar !== '/images/avatar-stub.png') {
+                const rootDir = process.cwd();
+                const oldFilePath = path.join(rootDir, 'public', user.avatar.replace(/^.*\//, ''));
+                if (fs.existsSync(oldFilePath)) {
+                    fs.unlinkSync(oldFilePath);
+                }
+            }
+
+
             await user.save();
 
             const normalized = UserNormalizer.normalize(user);
             res.status(201).json(normalized);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            if (req.file) {
+                const rootDir = process.cwd();
+                const filePath = path.join(rootDir, 'public', 'uploads', req.file.filename);
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
+            }
+            res.status(500).json({error: true, message: error.message});
         }
     }
 
@@ -85,36 +142,39 @@ class UserController {
             const user = await UserModel.findByIdAndUpdate(
                 req.params.id,
                 req.body,
-                { new: true }
+                {
+                    new: true,
+                    runValidators: true
+                }
             );
 
-            if (!user) return res.status(404).json({ error: 'Not found' });
+            if (!user) return res.status(404).json({error: 'Not found'});
 
             const normalized = UserNormalizer.normalize(user);
             res.json(normalized);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({error: error.message});
         }
     }
 
     async delete(req, res) {
         try {
             const user = await UserModel.findByIdAndDelete(req.params.id);
-            if (!user) return res.status(404).json({ error: 'Not found' });
-            res.json({ success: true });
+            if (!user) return res.status(404).json({error: 'Not found'});
+            res.json({success: true});
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({error: error.message});
         }
     }
 
     async uploadAvatar(req, res) {
         try {
             if (!req.file) {
-                return res.status(400).json({ error: 'Файл не загружен' });
+                return res.status(400).json({error: 'Файл не загружен'});
             }
 
-            const user = await UserModel.findById(req.params.id);
-            if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
+            const user = await UserModel.findOne({url: req.params.url});
+            if (!user) return res.status(404).json({error: 'Пользователь не найден'});
 
             // Удаляем старый файл, если он существует
             if (user.avatar) {
@@ -135,7 +195,7 @@ class UserController {
                 user: normalized
             });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({error: error.message});
         }
     }
 }

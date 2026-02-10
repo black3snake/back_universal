@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 
 // Создаем директорию для загрузок, если ее нет
-const uploadDir = path.join(__dirname, '../public/uploads');
+const rootDir = process.cwd();
+const uploadDir = path.join(rootDir, 'public', 'uploads', 'users');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -38,7 +39,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 2 * 1024 * 1024 // 2MB
+        fileSize: 1024 * 1024 // 1MB. Если надо больше, то fileSize: 2 * 1024 * 1024 (2Мб)
     },
     fileFilter: fileFilter
 });

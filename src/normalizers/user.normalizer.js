@@ -25,7 +25,7 @@ class UserNormalizer extends BaseNormalizer {
     }
 
     static getValidAvatarUrl(avatarPath) {
-        if (!avatarPath) {
+        if (!avatarPath || avatarPath === 'avatar-stub.png') {
             return `${config.baseUrl}${config.defaultAvatar}`;
         }
 

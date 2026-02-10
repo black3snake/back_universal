@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {toSlug} = require("../utils/common/transliterate");
+const Transliterate = require("../utils/common/transliterate");
 
 const UserSchema = new mongoose.Schema({
     firstName: String,
@@ -26,8 +26,8 @@ UserSchema.virtual('fullName').get(function() {
 
 // Метод для генерации URL
 UserSchema.methods.generateUrl = function() {
-    const fN = toSlug(this.firstName);
-    const lN = toSlug(this.lastName);
+    const fN = Transliterate.toSlug(this.firstName);
+    const lN = Transliterate.toSlug(this.lastName);
     return fN && lN ? `${fN}_${lN}` : (fN || lN || 'user');
 };
 
