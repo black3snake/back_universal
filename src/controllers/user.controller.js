@@ -139,21 +139,83 @@ class UserController {
 
     async update(req, res) {
         try {
-            const user = await UserModel.findByIdAndUpdate(
-                req.params.id,
-                req.body,
+            const { url } = req.params;
+
+            if (!url) {
+                return res.status(400).json({
+                    error: true,
+                    message: 'URL parameter is required'
+                });
+            }
+            const existingUser = await UserModel.findOne({ url });
+            if (!existingUser) {
+                return res.status(404).json({
+                    error: true,
+                    message: 'User not found'
+                });
+            }
+
+            // Подготавливаем данные для обновления
+            const updateData = { ...req.body };
+
+            // Обработка файла аватара (если загружен новый)
+            if (req.file) {
+                // Сохраняем новый аватар
+                const avatarUrl = `/uploads/users/${req.file.filename}`;
+                updateData.avatar = avatarUrl;
+
+                // Удаляем старый аватар, если он есть
+                if (existingUser.avatar) {
+                    const oldAvatarPath = path.join(
+                        process.cwd(),
+                        'public',
+                        existingUser.avatar
+                    );
+
+                    try {
+                        if (fs.existsSync(oldAvatarPath)) {
+                            fs.unlinkSync(oldAvatarPath);
+                            console.log('Старый аватар удален:', oldAvatarPath);
+                        }
+                    } catch (err) {
+                        console.error('Ошибка при удалении старого аватара:', err);
+                    }
+                }
+            }
+            // Если нужно удалить аватар (пришел avatar: null)
+            if (req.body.avatar === 'null' || req.body.avatar === '') {
+                // Удаляем файл старого аватара
+                if (existingUser.avatar) {
+                    const oldAvatarPath = path.join(
+                        process.cwd(),
+                        'public',
+                        existingUser.avatar
+                    );
+                    try {
+                        if (fs.existsSync(oldAvatarPath)) {
+                            fs.unlinkSync(oldAvatarPath);
+                        }
+                    } catch (err) {
+                        console.error('Ошибка при удалении аватара:', err);
+                    }
+                }
+                updateData.avatar = null;
+            }
+            // Обновляем пользователя
+            const updatedUser = await UserModel.findOneAndUpdate(
+                { url },
+                { $set: updateData },
                 {
-                    new: true,
-                    runValidators: true
+                    new: true,        // возвращаем обновленный документ
+                    runValidators: true // запускаем валидацию схемы
                 }
             );
 
-            if (!user) return res.status(404).json({error: 'Not found'});
-
-            const normalized = UserNormalizer.normalize(user);
+            const normalized = UserNormalizer.normalize(updatedUser);
             res.json(normalized);
+
         } catch (error) {
-            res.status(500).json({error: error.message});
+            res.status(500).json({error: true, message: error.message});
         }
     }
 
@@ -167,37 +229,6 @@ class UserController {
         }
     }
 
-    async uploadAvatar(req, res) {
-        try {
-            if (!req.file) {
-                return res.status(400).json({error: 'Файл не загружен'});
-            }
-
-            const user = await UserModel.findOne({url: req.params.url});
-            if (!user) return res.status(404).json({error: 'Пользователь не найден'});
-
-            // Удаляем старый файл, если он существует
-            if (user.avatar) {
-                const oldFilePath = path.join(__dirname, '../public', user.avatar);
-                if (fs.existsSync(oldFilePath)) {
-                    fs.unlinkSync(oldFilePath);
-                }
-            }
-
-            // Сохраняем путь относительно public директории
-            const relativePath = `/uploads/${req.file.filename}`;
-            user.avatar = relativePath;
-            await user.save();
-
-            const normalized = UserNormalizer.normalize(user);
-            res.json({
-                message: 'Аватар успешно загружен',
-                user: normalized
-            });
-        } catch (error) {
-            res.status(500).json({error: error.message});
-        }
-    }
 }
 
 module.exports = new UserController();
