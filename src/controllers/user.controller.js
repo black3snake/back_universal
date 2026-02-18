@@ -221,11 +221,47 @@ class UserController {
 
     async delete(req, res) {
         try {
-            const user = await UserModel.findByIdAndDelete(req.params.id);
-            if (!user) return res.status(404).json({error: 'Not found'});
-            res.json({success: true});
+            const {id} = req.params;
+
+            if (!id) {
+                return res.status(400).json({
+                    error: true,
+                    message: 'ID parameter is required'
+                });
+            }
+
+            const user = await UserModel.findById(id);
+            if (!user) {
+                return res.status(404).json({
+                    error: true,
+                    message: 'User not found'
+                })
+            }
+
+            if (user.avatar) {
+                const avatarPath =  path.join(process.cwd(), 'public', user.avatar);
+                try {
+                    if (fs.existsSync(avatarPath)) {
+                        fs.unlinkSync(avatarPath);
+                    }
+                } catch (err) {
+                    console.error('Ошибка при удалении аватара:', err.message);
+                }
+
+            }
+            await UserModel.findByIdAndDelete(req.params.id);
+
+            res.json({
+                error: false,
+                message: 'User deleted successfully'
+            });
+
+
         } catch (error) {
-            res.status(500).json({error: error.message});
+            res.status(500).json({
+                error: true,
+                message: error.message
+            });
         }
     }
 
