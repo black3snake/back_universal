@@ -13,12 +13,12 @@ class ValidationUtils {
                     'string.empty': `Необходимо заполнить "Фамилия"`,
                     'any.required': `Необходимо заполнить "Фамилия"`
                 }),
-            // avatar: Joi.string().required()
-            //     .messages({
-            //         'string.base': `"Имя файла" должен быть строкой`,
-            //         'string.empty': `Необходимо заполнить "Имя файла"`,
-            //         'any.required': `Необходимо заполнить "Имя файла"`
-            //     }),
+            avatar: Joi.string().required()
+                .messages({
+                    'string.base': `"Имя файла" должен быть строкой`,
+                    'string.empty': `Необходимо заполнить "Имя файла"`,
+                    'any.required': `Необходимо заполнить "Имя файла"`
+                }),
             experience: Joi.number().max(50).required()
                 .messages({
                     'string.base': `"Опыт" должен быть строкой`,

@@ -10,8 +10,6 @@ async function seedUsers() {
             serverSelectionTimeoutMS: 5000, // таймаут выбора сервера
             socketTimeoutMS: 45000, // таймаут сокета
             family: 4, // использовать IPv4
-            //useNewUrlParser: true,
-            //useUnifiedTopology: true
         });
 
         console.log('Подключение к БД успешно');

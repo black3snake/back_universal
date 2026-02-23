@@ -10,16 +10,40 @@ class UserController {
             const itemsPerPage = 10;
             const page = Math.max(1, parseInt(req.query.page, 10) || 1);
             const skip = (page - 1) * itemsPerPage;
+            let total = {};
+            let users = {};
+            let normalized = {};
+            // for search
+            const {query} = req.query;
+            if (query) {
+                const searchCondition = {
+                    $or: [
+                        {firstName: {$regex: query, $options: 'i'}},
+                        {lastName: {$regex: query, $options: 'i'}}
+                    ]
+                };
 
+                total = await UserModel.countDocuments(searchCondition);
 
-            const users = await UserModel.find()
-                .sort({createdAt: -1})
-                .skip(skip)
-                .limit(itemsPerPage);
+                users = await UserModel
+                    .find(searchCondition)
+                    .skip(skip)
+                    .limit(itemsPerPage)
+                    .lean();
 
-            const total = await UserModel.countDocuments();
+                normalized = users.map(item => UserNormalizer.normalize(item));
 
-            const normalized = UserNormalizer.normalizeList(users);
+            } else {
+
+                users = await UserModel.find()
+                    .sort({createdAt: -1})
+                    .skip(skip)
+                    .limit(itemsPerPage);
+
+                total = await UserModel.countDocuments();
+                normalized = UserNormalizer.normalizeList(users);
+            }
+
             res.json({
                 data: normalized,
                 pagination: {
@@ -31,8 +55,51 @@ class UserController {
             });
 
         } catch (error) {
-            res.status(500).json({error: error.message});
+            res.status(500).json({
+                    error: true,
+                    message: error.message
+                }
+            );
         }
+    }
+
+    async searchUsers(req, res) {
+        const itemsPerPage = 10;
+        const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+        const skip = (page - 1) * itemsPerPage;
+        const {query} = req.query;
+        if (!query) {
+            return res.status(400)
+                .json({error: true, message: "Не передан параметр query"});
+        }
+
+        const searchCondition = {
+            $or: [
+                {firstName: {$regex: query, $options: 'i'}},
+                {lastName: {$regex: query, $options: 'i'}}
+            ]
+        };
+
+        const total = await UserModel.countDocuments(searchCondition);
+
+        let users = await UserModel
+            .find(searchCondition)
+            .skip(skip)
+            .limit(itemsPerPage)
+            .lean();
+
+        users = users.map(item => UserNormalizer.normalize(item));
+
+        res.json({
+            data: users,
+            pagination: {
+                page,
+                itemsPerPage,
+                total,
+                totalPages: Math.ceil(total / itemsPerPage),
+            }
+        });
+
     }
 
     async getUser(req, res) {
@@ -59,18 +126,6 @@ class UserController {
             });
         }
     }
-
-    // async getOne(req, res) {
-    //     try {
-    //         const user = await UserModel.findById(req.params.id);
-    //         if (!user) return res.status(404).json({ error: 'Not found' });
-    //
-    //         const normalized = UserNormalizer.normalize(user);
-    //         res.json(normalized);
-    //     } catch (error) {
-    //         res.status(500).json({ error: error.message });
-    //     }
-    // }
 
     async create(req, res) {
         console.log('Данные запроса:', req.body);
@@ -101,7 +156,7 @@ class UserController {
             const existingUser = await UserModel.findOne({url: user.generateUrl()});
             if (existingUser) {
 
-                if (req.file) {
+                if (req.file && !req.file.includes('stub')) {
                     const rootDir = process.cwd();
                     const filePath = path.join(rootDir, 'public', 'uploads', req.file.filename);
                     if (fs.existsSync(filePath)) {
@@ -139,7 +194,7 @@ class UserController {
 
     async update(req, res) {
         try {
-            const { url } = req.params;
+            const {url} = req.params;
 
             if (!url) {
                 return res.status(400).json({
@@ -147,7 +202,7 @@ class UserController {
                     message: 'URL parameter is required'
                 });
             }
-            const existingUser = await UserModel.findOne({ url });
+            const existingUser = await UserModel.findOne({url});
             if (!existingUser) {
                 return res.status(404).json({
                     error: true,
@@ -156,7 +211,7 @@ class UserController {
             }
 
             // Подготавливаем данные для обновления
-            const updateData = { ...req.body };
+            const updateData = {...req.body};
 
             // Обработка файла аватара (если загружен новый)
             if (req.file) {
@@ -165,7 +220,7 @@ class UserController {
                 updateData.avatar = avatarUrl;
 
                 // Удаляем старый аватар, если он есть
-                if (existingUser.avatar) {
+                if (existingUser.avatar && !existingUser.avatar.includes('avatar-stub.png')) {
                     const oldAvatarPath = path.join(
                         process.cwd(),
                         'public',
@@ -185,7 +240,7 @@ class UserController {
             // Если нужно удалить аватар (пришел avatar: null)
             if (req.body.avatar === 'null' || req.body.avatar === '') {
                 // Удаляем файл старого аватара
-                if (existingUser.avatar) {
+                if (existingUser.avatar && !existingUser.avatar.includes('avatar-stub.png')) {
                     const oldAvatarPath = path.join(
                         process.cwd(),
                         'public',
@@ -203,8 +258,8 @@ class UserController {
             }
             // Обновляем пользователя
             const updatedUser = await UserModel.findOneAndUpdate(
-                { url },
-                { $set: updateData },
+                {url},
+                {$set: updateData},
                 {
                     new: true,        // возвращаем обновленный документ
                     runValidators: true // запускаем валидацию схемы
@@ -239,7 +294,7 @@ class UserController {
             }
 
             if (user.avatar) {
-                const avatarPath =  path.join(process.cwd(), 'public', user.avatar);
+                const avatarPath = path.join(process.cwd(), 'public', user.avatar);
                 try {
                     if (fs.existsSync(avatarPath)) {
                         fs.unlinkSync(avatarPath);
