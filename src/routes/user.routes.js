@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/', UserController.getUser);
 router.get('/:url', UserController.getUser);
-router.post('/', upload.single('avatar'), UserController.create);
+router.post('/', upload.single('avatarFile'), UserController.create);
 router.put('/:url', upload.single('avatar'), UserController.update);
 // router.put('/:id', UserController.update);
 router.delete('/:id', UserController.delete);

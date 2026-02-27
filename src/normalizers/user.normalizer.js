@@ -12,6 +12,7 @@ class UserNormalizer extends BaseNormalizer {
             firstName: user.firstName || '',
             lastName: user.lastName || '',
             avatar: this.getValidAvatarUrl(user.avatar),
+            avatarFile: user.avatarFile || '',
             experience: user.experience || 0,
             age: user.age || 0,
             address: user.address || '',
