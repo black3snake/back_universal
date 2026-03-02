@@ -27,9 +27,10 @@ async function seedUsers() {
                 experience: 5,
                 age: 30,
                 address: "Москва, ул. Ленина, 10",
-                phone: "",
-                email: "",
+                phone: "6740404",
+                email: "dfe@netu.net",
                 active: true,
+                reserved: true,
             },
             {
                 firstName: "Мария",
@@ -38,9 +39,10 @@ async function seedUsers() {
                 experience: 3,
                 age: 28,
                 address: "Санкт-Петербург, Невский пр., 25",
-                phone: "",
-                email: "",
+                phone: "34890607",
+                email: "gjretre@netu34.com",
                 active: true,
+                reserved: true,
             },
             {
                 firstName: "Алексей",
@@ -49,9 +51,10 @@ async function seedUsers() {
                 experience: 7,
                 age: 35,
                 address: "Казань, ул. Баумана, 5",
-                phone: "",
-                email: "",
+                phone: "4568843",
+                email: "rd5etre@netu.com",
                 active: true,
+                reserved: true,
             },
             {
                 firstName: "Ольга",
@@ -60,9 +63,10 @@ async function seedUsers() {
                 experience: 2,
                 age: 25,
                 address: "Екатеринбург, ул. Малышева, 45",
-                phone: "",
-                email: "",
+                phone: "45687868",
+                email: "retr34e@netu.com",
                 active: true,
+                reserved: true,
             },
             {
                 firstName: "Дмитрий",
@@ -71,9 +75,10 @@ async function seedUsers() {
                 experience: 10,
                 age: 42,
                 address: "Новосибирск, Красный проспект, 100",
-                phone: "",
-                email: "",
+                phone: "546456546",
+                email: "retre@netu.com",
                 active: true,
+                reserved: true,
             }
         ];
 
@@ -96,8 +101,9 @@ async function seedUsers() {
         console.log(`Добавлено ${result.length} пользователей`);
         // Проверка
         result.forEach(user => {
-            console.log(`${user.firstName} ${user.lastName}: ${user.url}`);
+            console.log(`${user.firstName} ${user.lastName}: ${user.url} | ${user.reserved}`);
         });
+
 
         console.log('Готово!');
         await mongoose.disconnect();

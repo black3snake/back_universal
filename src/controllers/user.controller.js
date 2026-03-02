@@ -1,6 +1,7 @@
 const UserModel = require('../models/user.model');
 const UserNormalizer = require('../normalizers/user.normalizer');
 const ValidationUtils = require("../utils/validation.utils");
+const config = require("../config/config");
 const path = require("path");
 const fs = require('fs');
 
@@ -145,6 +146,23 @@ class UserController {
             return res.status(400).json({error: true, message: error.details[0].message});
         }
         try {
+            // проверка ограничения кол-ва пользователей (спец. ограничение)
+            const userCount = await UserModel.countDocuments();
+            if (userCount >= config.MAX_USERS) {
+                if (req.file) {
+                    const rootDir = process.cwd();
+                    const filePath = path.join(rootDir, 'public', 'uploads', req.file.filename);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+
+                return res.status(400).json({
+                    error: true,
+                    message: `${config.USER_LIMIT_MESSAGE}: ${config.MAX_USERS}, current: ${userCount}`,
+                });
+            }
+
             // Создаем пользователя из данных формы
             const user = new UserModel({
                 ...req.body,
@@ -174,7 +192,6 @@ class UserController {
                     fs.unlinkSync(oldFilePath);
                 }
             }
-
 
             await user.save();
 
@@ -208,6 +225,20 @@ class UserController {
                     error: true,
                     message: 'User not found'
                 });
+            }
+
+            if (existingUser.reserved) {
+                if (req.file) {
+                    const rootDir = process.cwd();
+                    const filePath = path.join(rootDir, 'public', 'uploads', 'users', req.file.filename);
+                    if (fs.existsSync(filePath)) {
+                        fs.unlinkSync(filePath);
+                    }
+                }
+                return res.status(400).json({
+                    error: true,
+                    message: 'Этого пользователя запрещено редактировать'
+                })
             }
 
             // Подготавливаем данные для обновления
@@ -285,11 +316,26 @@ class UserController {
                 });
             }
 
+            const userCount = await UserModel.countDocuments();
+            if (userCount <= config.MIN_USERS) {
+                return res.status(400).json({
+                    error: true,
+                    message: `Достигнут лимит удаления пользователей: ${config.MIN_USERS}`
+                });
+            }
+
             const user = await UserModel.findById(id);
             if (!user) {
                 return res.status(404).json({
                     error: true,
                     message: 'User not found'
+                })
+            }
+
+            if (user.reserved) {
+                return res.status(400).json({
+                    error: true,
+                    message: 'Этого пользователя запрещено удалять'
                 })
             }
 

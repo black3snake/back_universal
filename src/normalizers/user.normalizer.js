@@ -19,6 +19,7 @@ class UserNormalizer extends BaseNormalizer {
             phone: user.phone || '',
             email: user.email || '',
             active: user.active || false,
+            reserved: user.reserved || false,
             createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : null
         };
         normalized.url = user.url || this.generateUrlFromUser(user);

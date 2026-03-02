@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema({
     phone: String,
     email: String,
     active: Boolean,
+    reserved: Boolean,
     url: {
       type: String,
       unique: true,
