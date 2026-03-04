@@ -4,7 +4,10 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon --inspect=4004 app.js",
+    "start": "node app.js",
+    "start:dev": "nodemon --inspect=4004 --env-file=.env.development app.js",
+    "start:prod": "node --env-file=.env.production app.js",
+    "start:staging": "node --env-file=.env.staging app.js",
     "seed": "node database/seed-users.js"
   },
   "keywords": [],
@@ -13,6 +16,7 @@
   "dependencies": {
     "@hapi/joi": "^17.1.1",
     "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
     "express": "^5.0.0",
     "mongoose": "^8.9.5",
     "multer": "^2.0.2",

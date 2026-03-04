@@ -23,7 +23,7 @@ async function seedUsers() {
             {
                 firstName: "Иван",
                 lastName: "Петров",
-                avatar: "/uploads/users/ivan.jpg",
+                avatar: "ivan.jpg",
                 experience: 5,
                 age: 30,
                 address: "Москва, ул. Ленина, 10",
@@ -35,7 +35,7 @@ async function seedUsers() {
             {
                 firstName: "Мария",
                 lastName: "Сидорова",
-                avatar: "/uploads/users/maria.jpg",
+                avatar: "maria.jpg",
                 experience: 3,
                 age: 28,
                 address: "Санкт-Петербург, Невский пр., 25",
@@ -47,7 +47,7 @@ async function seedUsers() {
             {
                 firstName: "Алексей",
                 lastName: "Иванов",
-                avatar: "/uploads/users/alexey.jpg",
+                avatar: "alexey.jpg",
                 experience: 7,
                 age: 35,
                 address: "Казань, ул. Баумана, 5",
@@ -59,7 +59,7 @@ async function seedUsers() {
             {
                 firstName: "Ольга",
                 lastName: "Смирнова",
-                avatar: "/uploads/users/olga.jpg",
+                avatar: "olga.jpg",
                 experience: 2,
                 age: 25,
                 address: "Екатеринбург, ул. Малышева, 45",
@@ -71,7 +71,7 @@ async function seedUsers() {
             {
                 firstName: "Дмитрий",
                 lastName: "Кузнецов",
-                avatar: "/uploads/users/dmitry.jpg",
+                avatar: "dmitry.jpg",
                 experience: 10,
                 age: 42,
                 address: "Новосибирск, Красный проспект, 100",

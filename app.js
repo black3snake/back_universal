@@ -21,11 +21,18 @@ MongoDBConnection.getConnection((error, connection) => {
     }
     const app = express();
 
-    app.use(cors());
+    app.use(cors({
+        origin: config.frontendUrl,
+        credentials: true,
+        method: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization']
+    }));
+
     app.use(express.json());
     app.use(express.urlencoded({ extended: true })); // Для form-data
     app.use(express.static(path.join(__dirname, 'public')));
 
+    app.use("/api/", usersRoutes);
     app.use("/api/users", usersRoutes);
     app.use("/api/user", userRoutes);
     // 404
@@ -41,14 +48,17 @@ MongoDBConnection.getConnection((error, connection) => {
         res.status(err.status || 500).json({
             error: true,
             message: err.message,
-            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+            ...(config.env === 'development' && { stack: err.stack })
         });
     });
     // app.use(function (err, req, res, next) {
     //     res.status(err.statusCode || err.status || 500).send({error: true, message: err.message});
     // });
 
-    app.listen(config.port, () =>
-        console.log(`Server started on port ${config.port}`)
-    );
+    app.listen(config.port, () => {
+        console.log(`Server started on port ${config.port}`);
+        console.log(`Environment: ${config.env}`);
+        console.log(`Base URL: ${config.baseUrl}`);
+        console.log(`Frontend URL: ${config.frontendUrl}`);
+    })
 })

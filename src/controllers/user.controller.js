@@ -140,7 +140,7 @@ class UserController {
         }
 
 
-        const {error} = ValidationUtils.createOrderValidation(req.body);
+        const {error, value} = ValidationUtils.createOrderValidation(req.body);
         if (error) {
             console.log(error.details);
             return res.status(400).json({error: true, message: error.details[0].message});
@@ -165,7 +165,7 @@ class UserController {
 
             // Создаем пользователя из данных формы
             const user = new UserModel({
-                ...req.body,
+                ...value,
                 // Если есть файл, добавляем путь к аватару
                 avatar: req.file ? `/uploads/users/${req.file.filename}` : '/images/avatar-stub.png'
             });
@@ -227,7 +227,7 @@ class UserController {
                 });
             }
 
-            if (existingUser.reserved) {
+            if (existingUser?.reserved) {
                 if (req.file) {
                     const rootDir = process.cwd();
                     const filePath = path.join(rootDir, 'public', 'uploads', 'users', req.file.filename);

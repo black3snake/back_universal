@@ -54,11 +54,18 @@ class ValidationUtils {
                     'any.required': `Необходимо заполнить "E-mail"`
                 }),
             active: Joi.boolean().strict()
+                .default(false)
                 .messages({
-                    'string.base': `"Active" должен быть булевой значением`,
-                    'string.empty': `Необходимо заполнить "Active"`,
+                    'boolean.base': `"Active" должен быть булевой значением`,
+                    'boolean.empty': `Необходимо заполнить "Active"`,
                     'any.required': `Необходимо заполнить "Active"`
                 }),
+            reserved: Joi.boolean().strict()
+                .default(false) // Если не передано, будет false
+                .messages({
+                    'boolean.base': 'Поле "reserved" должно быть true или false'
+                })
+
         });
         return schema.validate(data);
     }
