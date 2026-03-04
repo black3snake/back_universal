@@ -11,7 +11,8 @@ class UserNormalizer extends BaseNormalizer {
             id: this.normalizeId(user._id),
             firstName: user.firstName || '',
             lastName: user.lastName || '',
-            avatar: this.getValidAvatarUrl(user.avatar),
+            // avatar: this.getValidAvatarUrl(user.avatar),
+            avatar: user.avatar || config.defaultAvatar,
             avatarFile: user.avatarFile || '',
             experience: user.experience || 0,
             age: user.age || 0,
@@ -26,27 +27,27 @@ class UserNormalizer extends BaseNormalizer {
         return normalized;
     }
 
-    static getValidAvatarUrl(avatarPath) {
-        if (!avatarPath || avatarPath === 'avatar-stub.png') {
-            return `${config.baseUrl}${config.defaultAvatar}`;
-        }
-
-        try {
-            const rootDir = process.cwd();
-            // const fullPath = path.join(__dirname, '../public', avatarPath);
-            const fullPath = path.join(rootDir, 'public', avatarPath);
-
-            if (fs.existsSync(fullPath)) {
-                return `${config.baseUrl}${avatarPath}`;
-            } else {
-                console.warn(`Avatar file not found: ${avatarPath}`);
-                return `${config.baseUrl}${config.defaultAvatar}`;
-            }
-        } catch (error) {
-            console.error(`Error checking avatar file: ${error.message}`);
-            return `${config.baseUrl}${config.defaultAvatar}`;
-        }
-    }
+    // static getValidAvatarUrl(avatarPath) {
+    //     if (!avatarPath || avatarPath === 'avatar-stub.png') {
+    //         return `${config.defaultAvatar}`;
+    //     }
+    //
+    //     try {
+    //         const rootDir = process.cwd();
+    //         // const fullPath = path.join(__dirname, '../public', avatarPath);
+    //         const fullPath = path.join(rootDir, 'public', avatarPath);
+    //
+    //         if (fs.existsSync(fullPath)) {
+    //             return `${config.baseUrl}${avatarPath}`;
+    //         } else {
+    //             console.warn(`Avatar file not found: ${avatarPath}`);
+    //             return `${config.baseUrl}${config.defaultAvatar}`;
+    //         }
+    //     } catch (error) {
+    //         console.error(`Error checking avatar file: ${error.message}`);
+    //         return `${config.baseUrl}${config.defaultAvatar}`;
+    //     }
+    // }
 
     static generateUrlFromUser(user) {
         if (user.generateUrl && typeof user.generateUrl === 'function') {

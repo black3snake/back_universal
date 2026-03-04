@@ -34,7 +34,7 @@ const config = {
         dbPort: process.env.DB_PORT || 27017,
     },
 
-    defaultAvatar: process.env.DEFAULT_AVATAR || '/images/avatar-stub.png',
+    defaultAvatar: process.env.DEFAULT_AVATAR || 'avatar-stub.png',
     MAX_USERS: process.env.MAX_USERS || 23,
     USER_LIMIT_MESSAGE: process.env.USER_LIMIT_MESSAGE || 'Достигнут лимит пользователей в системе',
     MIN_USERS: process.env.MIN_USERS || 10,

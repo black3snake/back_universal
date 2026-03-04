@@ -247,14 +247,16 @@ class UserController {
             // Обработка файла аватара (если загружен новый)
             if (req.file) {
                 // Сохраняем новый аватар
-                const avatarUrl = `/uploads/users/${req.file.filename}`;
-                updateData.avatar = avatarUrl;
+                // const avatarUrl = `/uploads/users/${req.file.filename}`;
+                updateData.avatar = req.file.filename;
 
                 // Удаляем старый аватар, если он есть
                 if (existingUser.avatar && !existingUser.avatar.includes('avatar-stub.png')) {
                     const oldAvatarPath = path.join(
                         process.cwd(),
                         'public',
+                        'uploads',
+                        'users',
                         existingUser.avatar
                     );
 
@@ -275,6 +277,8 @@ class UserController {
                     const oldAvatarPath = path.join(
                         process.cwd(),
                         'public',
+                        'uploads',
+                        'users',
                         existingUser.avatar
                     );
                     try {

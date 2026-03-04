@@ -3,7 +3,7 @@ const UserController = require("../controllers/user.controller");
 const upload = require("../utils/common/upload");
 const router = express.Router();
 
-router.get('/', UserController.getUser);
+// router.get('/', UserController.getUser);
 router.get('/:url', UserController.getUser);
 router.post('/', upload.single('avatarFile'), UserController.create);
 router.put('/:url', upload.single('avatar'), UserController.update);

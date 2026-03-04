@@ -32,7 +32,6 @@ MongoDBConnection.getConnection((error, connection) => {
     app.use(express.urlencoded({ extended: true })); // Для form-data
     app.use(express.static(path.join(__dirname, 'public')));
 
-    app.use("/api/", usersRoutes);
     app.use("/api/users", usersRoutes);
     app.use("/api/user", userRoutes);
     // 404
