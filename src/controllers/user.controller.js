@@ -238,8 +238,18 @@ class UserController {
                 })
             }
 
+
+            const {error, value} = ValidationUtils.updateOrderValidation(req.body);
+            if (error) {
+                console.log(error.details);
+                return res.status(400).json({error: true, message: error.details[0].message});
+            }
+            // Если объект пустой или нет полей для обновления
+            if (Object.keys(value).length === 0) {
+                return res.status(400).json({error: true, message: "Нет данных для обновления"});
+            }
             // Подготавливаем данные для обновления
-            const updateData = {...req.body};
+            const updateData = {...value};
 
             // Обработка файла аватара (если загружен новый)
             if (req.file) {
