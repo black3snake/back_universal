@@ -57,7 +57,7 @@ MongoDBConnection.getConnection((error, connection) => {
     app.listen(config.port, () => {
         console.log(`Server started on port ${config.port}`);
         console.log(`Environment: ${config.env}`);
-        console.log(`Base URL: ${config.baseUrl}`);
+        // console.log(`Base URL: ${config.baseUrl}`);
         console.log(`Frontend URL: ${config.frontendUrl}`);
     })
 })

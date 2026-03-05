@@ -150,8 +150,7 @@ class UserController {
             const userCount = await UserModel.countDocuments();
             if (userCount >= config.MAX_USERS) {
                 if (req.file) {
-                    const rootDir = process.cwd();
-                    const filePath = path.join(rootDir, 'public', 'uploads', req.file.filename);
+                    const filePath = path.join(process.cwd(), 'public', 'uploads', req.file.filename);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
                     }
@@ -166,17 +165,15 @@ class UserController {
             // Создаем пользователя из данных формы
             const user = new UserModel({
                 ...value,
-                // Если есть файл, добавляем путь к аватару
-                avatar: req.file ? `/uploads/users/${req.file.filename}` : '/images/avatar-stub.png'
+                // Если есть файл, добавляем путь имя файла аватара либо заглушку
+                avatar: req.file ? req.file.filename : 'avatar-stub.png'
             });
 
             // const user = new UserModel(req.body);
             const existingUser = await UserModel.findOne({url: user.generateUrl()});
             if (existingUser) {
-
                 if (req.file && !req.file.includes('stub')) {
-                    const rootDir = process.cwd();
-                    const filePath = path.join(rootDir, 'public', 'uploads', req.file.filename);
+                    const filePath = path.join(process.cwd(), 'public', 'uploads', req.file.filename);
                     if (fs.existsSync(filePath)) {
                         fs.unlinkSync(filePath);
                     }
@@ -185,13 +182,13 @@ class UserController {
             }
 
             // Удаляем старый файл, если есть (для обновления)
-            if (user.avatar && user.avatar !== '/images/avatar-stub.png') {
-                const rootDir = process.cwd();
-                const oldFilePath = path.join(rootDir, 'public', user.avatar.replace(/^.*\//, ''));
-                if (fs.existsSync(oldFilePath)) {
-                    fs.unlinkSync(oldFilePath);
-                }
-            }
+            // if (user.avatar && user.avatar !== '/images/avatar-stub.png') {
+            //     const rootDir = process.cwd();
+            //     const oldFilePath = path.join(rootDir, 'public', user.avatar.replace(/^.*\//, ''));
+            //     if (fs.existsSync(oldFilePath)) {
+            //         fs.unlinkSync(oldFilePath);
+            //     }
+            // }
 
             await user.save();
 

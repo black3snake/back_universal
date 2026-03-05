@@ -13,12 +13,12 @@ const config = {
     port: process.env.PORT || 4000,
     inspectPort: process.env.INSPECT_PORT || 4004,
 
-    get baseUrl() {
-        if (this.env === 'production') {
-            return process.env.BASE_URL || 'https://site080.podderzka-irk.ru';
-        }
-        return process.env.BASE_URL || `http://localhost:${this.port}`;
-    },
+    // get baseUrl() {
+    //     if (this.env === 'production') {
+    //         return process.env.BASE_URL || 'https://site080.podderzka-irk.ru';
+    //     }
+    //     return process.env.BASE_URL || `http://localhost:${this.port}`;
+    // },
 
     get frontendUrl() {
         if (this.env === 'production') {
