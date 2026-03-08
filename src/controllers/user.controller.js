@@ -238,7 +238,9 @@ class UserController {
                 })
             }
 
-
+            if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'active')) {     // или ES2022+  Object.hasOwn(req.body, 'active')
+                req.body.active = req.body.active === 'true';
+            }
             const {error, value} = ValidationUtils.updateOrderValidation(req.body);
             if (error) {
                 console.log(error.details);
