@@ -241,13 +241,14 @@ class UserController {
             if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'active')) {     // или ES2022+  Object.hasOwn(req.body, 'active')
                 req.body.active = req.body.active === 'true';
             }
-            const {error, value} = ValidationUtils.updateOrderValidation(req.body);
+            const {error, value} = (req.file && (req.body && Object.keys(req.body).length > 0)) ? ValidationUtils.updateOrderValidation(req.body) : { error: null, value: {} };
+
             if (error) {
                 console.log(error.details);
                 return res.status(400).json({error: true, message: error.details[0].message});
             }
             // Если объект пустой или нет полей для обновления
-            if (Object.keys(value).length === 0) {
+            if (Object.keys(value).length === 0 && !req.file) {
                 return res.status(400).json({error: true, message: "Нет данных для обновления"});
             }
             // Подготавливаем данные для обновления
